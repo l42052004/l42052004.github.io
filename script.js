@@ -13,7 +13,7 @@ function renderTimers() {
 
     timerDiv.innerHTML = `
       <h3 contenteditable="true" id="name-${index}" onblur="updateName(${index})">${timer.name}</h3>
-      <p>設定時間: <span id="initialTime-${index}">${formatTime(timer.initialTime)}</span></p>
+      <p>設定時間: <span contenteditable="true" id="initialTime-${index}" onblur="updateTime(${index})">${formatTime(timer.initialTime)}</span></p>
       <p>倒數時間: <span id="remainingTime-${index}">${formatTime(timer.remainingTime)}</span></p>
       <button onclick="startTimer(${index})">開始</button>
       <button onclick="pauseTimer(${index})">暫停</button>
@@ -55,10 +55,11 @@ document.getElementById('addTimerBtn').addEventListener('click', () => {
 
 // 更新時間
 function updateTime(index) {
-  const timeElement = document.getElementById(`time-${index}`);
-  const timeParts = timeElement.textContent.split(':');
+  const timeElement = document.getElementById(`initialTime-${index}`);
+  const timeParts = timeElement.textContent.split(':'); // 解析時間格式
   let totalSeconds = 0;
 
+  // 檢查時間格式是否為 HH:MM:SS
   if (timeParts.length === 3) {
     const hours = parseInt(timeParts[0], 10) || 0;
     const minutes = parseInt(timeParts[1], 10) || 0;
@@ -66,9 +67,11 @@ function updateTime(index) {
     totalSeconds = hours * 3600 + minutes * 60 + seconds;
   }
 
-  timers[index].initialTime = totalSeconds; // 更新初始時間
+  // 更新計時器的初始時間與倒數時間
+  timers[index].initialTime = totalSeconds;
   timers[index].remainingTime = totalSeconds; // 同步更新倒數時間
-  saveTimers();
+  saveTimers(); // 保存到 localStorage
+  renderTimers(); // 重新渲染
 }
 
 // 開始倒數計時
