@@ -13,9 +13,11 @@ function renderTimers() {
 
     timerDiv.innerHTML = `
       <h3 contenteditable="true" id="name-${index}" onblur="updateName(${index})">${timer.name}</h3>
-      <p contenteditable="true" id="time-${index}" onblur="updateTime(${index})">${formatTime(timer.remainingTime)}</p>
+      <p>設定時間: <span id="initialTime-${index}">${formatTime(timer.initialTime)}</span></p>
+      <p>倒數時間: <span id="remainingTime-${index}">${formatTime(timer.remainingTime)}</span></p>
       <button onclick="startTimer(${index})">開始</button>
       <button onclick="pauseTimer(${index})">暫停</button>
+      <button onclick="resetTimer(${index})">重新開始</button>
       <button onclick="deleteTimer(${index})">刪除</button>
     `;
 
@@ -51,29 +53,17 @@ function updateTime(index) {
     totalSeconds = hours * 3600 + minutes * 60 + seconds;
   }
 
-  timers[index].remainingTime = totalSeconds;
+  timers[index].initialTime = totalSeconds; // 更新初始時間
+  timers[index].remainingTime = totalSeconds; // 同步更新倒數時間
   saveTimers();
 }
-
-// 新增倒數計時器，使用預設名稱和時間
-document.getElementById('addTimerBtn').addEventListener('click', () => {
-  timerCount++;
-  timers.push({
-    name: `Timer #${timerCount}`,
-    initialTime: 0,
-    remainingTime: 0,
-    intervalId: null
-  });
-  saveTimers();
-  renderTimers();
-});
 
 // 開始倒數計時
 function startTimer(index) {
   if (timers[index].intervalId) return; // 如果計時器已經在倒數中，則不再啟動
   timers[index].intervalId = setInterval(() => {
     timers[index].remainingTime--;
-    document.getElementById(`time-${index}`).textContent = formatTime(timers[index].remainingTime);
+    document.getElementById(`remainingTime-${index}`).textContent = formatTime(timers[index].remainingTime);
     
     if (timers[index].remainingTime <= 0) {
       clearInterval(timers[index].intervalId);
@@ -89,6 +79,14 @@ function pauseTimer(index) {
   clearInterval(timers[index].intervalId);
   timers[index].intervalId = null;
   saveTimers();
+}
+
+// 重新開始計時器
+function resetTimer(index) {
+  clearInterval(timers[index].intervalId);
+  timers[index].remainingTime = timers[index].initialTime; // 重置為初始時間
+  document.getElementById(`remainingTime-${index}`).textContent = formatTime(timers[index].remainingTime);
+  startTimer(index); // 重新開始倒數
 }
 
 // 刪除倒數計時器
