@@ -40,6 +40,19 @@ function updateName(index) {
   saveTimers();
 }
 
+// 新增倒數計時器，使用預設名稱和時間
+document.getElementById('addTimerBtn').addEventListener('click', () => {
+  timerCount++;
+  timers.push({
+    name: `Timer #${timerCount}`,
+    initialTime: 0,   // 初始化時間為 0 秒
+    remainingTime: 0, // 同步倒數時間為 0 秒
+    intervalId: null  // 初始化時不進行倒數
+  });
+  saveTimers();
+  renderTimers(); // 更新 UI 顯示新的計時器
+});
+
 // 更新時間
 function updateTime(index) {
   const timeElement = document.getElementById(`time-${index}`);
