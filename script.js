@@ -1,5 +1,6 @@
 // 定義一個儲存所有倒數計時器的資料結構
 let timers = JSON.parse(localStorage.getItem('timers')) || [];
+let timerCount = timers.length; // 計算現有計時器數量
 
 // 初始化計時器 UI
 function renderTimers() {
@@ -11,8 +12,8 @@ function renderTimers() {
     timerDiv.className = 'timer';
 
     timerDiv.innerHTML = `
-      <h3>${timer.name}</h3>
-      <p id="time-${index}">${formatTime(timer.remainingTime)}</p>
+      <h3 contenteditable="true" id="name-${index}" onblur="updateName(${index})">${timer.name}</h3>
+      <p contenteditable="true" id="time-${index}" onblur="updateTime(${index})">${formatTime(timer.remainingTime)}</p>
       <button onclick="startTimer(${index})">開始</button>
       <button onclick="pauseTimer(${index})">暫停</button>
       <button onclick="deleteTimer(${index})">刪除</button>
@@ -30,16 +31,41 @@ function formatTime(seconds) {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-// 新增倒數計時器
-document.getElementById('addTimerBtn').addEventListener('click', () => {
-  const name = prompt('請輸入計時器名稱:');
-  const time = parseInt(prompt('請輸入倒數時間 (以秒為單位):'), 10);
+// 更新名稱
+function updateName(index) {
+  const nameElement = document.getElementById(`name-${index}`);
+  timers[index].name = nameElement.textContent || `Timer #${index + 1}`; // 若名稱留空則設置為預設值
+  saveTimers();
+}
 
-  if (name && !isNaN(time)) {
-    timers.push({ name: name, initialTime: time, remainingTime: time, intervalId: null });
-    saveTimers();
-    renderTimers();
+// 更新時間
+function updateTime(index) {
+  const timeElement = document.getElementById(`time-${index}`);
+  const timeParts = timeElement.textContent.split(':');
+  let totalSeconds = 0;
+
+  if (timeParts.length === 3) {
+    const hours = parseInt(timeParts[0], 10) || 0;
+    const minutes = parseInt(timeParts[1], 10) || 0;
+    const seconds = parseInt(timeParts[2], 10) || 0;
+    totalSeconds = hours * 3600 + minutes * 60 + seconds;
   }
+
+  timers[index].remainingTime = totalSeconds;
+  saveTimers();
+}
+
+// 新增倒數計時器，使用預設名稱和時間
+document.getElementById('addTimerBtn').addEventListener('click', () => {
+  timerCount++;
+  timers.push({
+    name: `Timer #${timerCount}`,
+    initialTime: 0,
+    remainingTime: 0,
+    intervalId: null
+  });
+  saveTimers();
+  renderTimers();
 });
 
 // 開始倒數計時
