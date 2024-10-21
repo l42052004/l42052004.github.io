@@ -59,6 +59,19 @@ function updateTime(index) {
   renderTimers();
 }
 
+// 新增倒數計時器，使用預設名稱和時間
+document.getElementById('addTimerBtn').addEventListener('click', () => {
+  timerCount++;
+  timers.push({
+    name: `Timer #${timerCount}`,
+    initialTime: 0,   // 初始化時間為 0 秒
+    remainingTime: 0, // 同步倒數時間為 0 秒
+    intervalId: null  // 初始化時不進行倒數
+  });
+  saveTimers();
+  renderTimers(); // 更新 UI 顯示新的計時器
+});
+
 // 開始倒數計時
 function startTimer(index) {
   if (timers[index].intervalId) return; // 如果計時器已經在倒數中，則不再啟動
