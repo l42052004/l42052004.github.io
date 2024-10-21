@@ -1,0 +1,34 @@
+/* 隱藏輸入框右側的上下箭頭 */
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Chrome, Safari, Edge */
+  margin: 0; /* 移除預設的 margin */
+}
+
+/* 隱藏外框並設置圓角邊框 */
+input[type="number"] {
+  border: none; /* 移除黑色邊框 */
+  outline: none; /* 移除選中時的藍色邊框 */
+  background-color: #f0f0f0; /* 設置背景顏色 */
+  padding: 5px;
+  border-radius: 5px; /* 圓角 */
+  text-align: center; /* 文字置中 */
+  font-size: 16px; /* 字體大小 */
+  width: 40px; /* 控制寬度 */
+  margin: 0 5px; /* 為每個框設置左右間距 */
+}
+
+/* 添加交互效果：當鼠標懸停時變色 */
+input[type="number"]:hover {
+  background-color: #e0e0e0;
+}
+
+/* 添加焦點效果：當輸入框獲取焦點時變色 */
+input[type="number"]:focus {
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+}
