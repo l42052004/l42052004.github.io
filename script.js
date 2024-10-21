@@ -18,15 +18,26 @@ volumeControl.addEventListener('input', () => {
 // 初始化計時器 UI
 function renderTimers() {
   const container = document.getElementById('timersContainer');
-  container.innerHTML = ''; // 清空容器
+  container.innerHTML = '';  // 清空容器
 
   timers.forEach((timer, index) => {
     const timerDiv = document.createElement('div');
     timerDiv.className = 'timer';
 
+    // 將初始時間轉換為 HH:MM:SS 格式
+    const hours = Math.floor(timer.initialTime / 3600);
+    const minutes = Math.floor((timer.initialTime % 3600) / 60);
+    const seconds = timer.initialTime % 60;
+
     timerDiv.innerHTML = `
       <h3 contenteditable="true" id="name-${index}" onblur="updateName(${index})">${timer.name}</h3>
-      <p>設定時間: <span contenteditable="true" id="initialTime-${index}" onblur="updateTime(${index})">${formatTime(timer.initialTime)}</span></p>
+      <p>設定時間: 
+        <input type="number" id="hours-${index}" min="0" max="99" value="${hours}" onchange="updateTime(${index})" style="width: 40px;">
+        :
+        <input type="number" id="minutes-${index}" min="0" max="59" value="${minutes.toString().padStart(2, '0')}" onchange="updateTime(${index})" style="width: 40px;">
+        :
+        <input type="number" id="seconds-${index}" min="0" max="59" value="${seconds.toString().padStart(2, '0')}" onchange="updateTime(${index})" style="width: 40px;">
+      </p>
       <p>倒數時間: <span id="remainingTime-${index}">${formatTime(timer.remainingTime)}</span></p>
       <button onclick="startTimer(${index})">開始</button>
       <button onclick="pauseTimer(${index})">暫停</button>
@@ -37,6 +48,7 @@ function renderTimers() {
     container.appendChild(timerDiv);
   });
 }
+
 
 // 格式化時間為 HH:MM:SS
 function formatTime(seconds) {
@@ -55,21 +67,73 @@ function updateName(index) {
 
 // 更新時間
 function updateTime(index) {
-  const timeElement = document.getElementById(`initialTime-${index}`);
-  const timeParts = timeElement.textContent.split(':');
-  let totalSeconds = 0;
+  const hoursInput = document.getElementById(`hours-${index}`);
+  const minutesInput = document.getElementById(`minutes-${index}`);
+  const secondsInput = document.getElementById(`seconds-${index}`);
 
-  if (timeParts.length === 3) {
-    const hours = parseInt(timeParts[0], 10) || 0;
-    const minutes = parseInt(timeParts[1], 10) || 0;
-    const seconds = parseInt(timeParts[2], 10) || 0;
-    totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  let hours = parseInt(hoursInput.value, 10) || 0;
+  let minutes = parseInt(minutesInput.value, 10) || 0;
+  let seconds = parseInt(secondsInput.value, 10) || 0;
+
+  // 處理進位邏輯
+  if (seconds >= 60) {
+    minutes += Math.floor(seconds / 60);
+    seconds = seconds % 60;
   }
 
-  timers[index].initialTime = totalSeconds; // 更新初始時間
-  timers[index].remainingTime = totalSeconds; // 同步更新倒數時間
+  if (minutes >= 60) {
+    hours += Math.floor(minutes / 60);
+    minutes = minutes % 60;
+  }
+
+  // 更新輸入框以顯示正確的時間
+  hoursInput.value = hours;
+  minutesInput.value = minutes.toString().padStart(2, '0');
+  secondsInput.value = seconds.toString().padStart(2, '0');
+
+  // 計算總秒數並更新計時器
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  timers[index].initialTime = totalSeconds;
+  timers[index].remainingTime = totalSeconds;
+
   saveTimers();
   renderTimers();
+}
+
+
+// 更新時間輸入框中的值，並進位
+function updateTimeWithFields() {
+  const hoursInput = document.getElementById('hours');
+  const minutesInput = document.getElementById('minutes');
+  const secondsInput = document.getElementById('seconds');
+
+  let hours = parseInt(hoursInput.value, 10) || 0;
+  let minutes = parseInt(minutesInput.value, 10) || 0;
+  let seconds = parseInt(secondsInput.value, 10) || 0;
+
+  // 處理進位邏輯
+  if (seconds >= 60) {
+    minutes += Math.floor(seconds / 60);
+    seconds = seconds % 60;  // 取餘數作為秒數
+  }
+
+  if (minutes >= 60) {
+    hours += Math.floor(minutes / 60);
+    minutes = minutes % 60;  // 取餘數作為分鐘數
+  }
+
+  // 更新輸入框的值以顯示進位後的結果
+  hoursInput.value = hours;
+  minutesInput.value = minutes.toString().padStart(2, '0'); // 格式化
+  secondsInput.value = seconds.toString().padStart(2, '0'); // 格式化
+
+  // 將時間轉換為總秒數，並更新計時器數據
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  timers[0].initialTime = totalSeconds;  // 假設是修改第一個計時器
+  timers[0].remainingTime = totalSeconds;
+  
+  saveTimers();  // 保存至 LocalStorage
+  renderTimers();  // 重新渲染計時器
 }
 
 // 新增倒數計時器，使用預設名稱和時間
