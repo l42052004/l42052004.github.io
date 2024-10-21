@@ -40,26 +40,12 @@ function updateName(index) {
   saveTimers();
 }
 
-// 新增倒數計時器，使用預設名稱和時間
-document.getElementById('addTimerBtn').addEventListener('click', () => {
-  timerCount++;
-  timers.push({
-    name: `Timer #${timerCount}`,
-    initialTime: 0,   // 初始化時間為 0 秒
-    remainingTime: 0, // 同步倒數時間為 0 秒
-    intervalId: null  // 初始化時不進行倒數
-  });
-  saveTimers();
-  renderTimers(); // 更新 UI 顯示新的計時器
-});
-
 // 更新時間
 function updateTime(index) {
   const timeElement = document.getElementById(`initialTime-${index}`);
-  const timeParts = timeElement.textContent.split(':'); // 解析時間格式
+  const timeParts = timeElement.textContent.split(':');
   let totalSeconds = 0;
 
-  // 檢查時間格式是否為 HH:MM:SS
   if (timeParts.length === 3) {
     const hours = parseInt(timeParts[0], 10) || 0;
     const minutes = parseInt(timeParts[1], 10) || 0;
@@ -67,20 +53,26 @@ function updateTime(index) {
     totalSeconds = hours * 3600 + minutes * 60 + seconds;
   }
 
-  // 更新計時器的初始時間與倒數時間
-  timers[index].initialTime = totalSeconds;
+  timers[index].initialTime = totalSeconds; // 更新初始時間
   timers[index].remainingTime = totalSeconds; // 同步更新倒數時間
-  saveTimers(); // 保存到 localStorage
-  renderTimers(); // 重新渲染
+  saveTimers();
+  renderTimers();
 }
 
 // 開始倒數計時
 function startTimer(index) {
   if (timers[index].intervalId) return; // 如果計時器已經在倒數中，則不再啟動
+
+  const startTime = Date.now(); // 記錄開始時間戳
+  const initialRemainingTime = timers[index].remainingTime; // 記錄倒數剩餘時間
+
   timers[index].intervalId = setInterval(() => {
-    timers[index].remainingTime--;
+    const elapsedTime = Math.floor((Date.now() - startTime) / 1000); // 計算經過的秒數
+    const updatedRemainingTime = initialRemainingTime - elapsedTime; // 根據經過的時間計算剩餘時間
+
+    timers[index].remainingTime = Math.max(updatedRemainingTime, 0); // 保證時間不為負數
     document.getElementById(`remainingTime-${index}`).textContent = formatTime(timers[index].remainingTime);
-    
+
     if (timers[index].remainingTime <= 0) {
       clearInterval(timers[index].intervalId);
       timers[index].intervalId = null;
