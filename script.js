@@ -2,6 +2,19 @@
 let timers = JSON.parse(localStorage.getItem('timers')) || [];
 let timerCount = timers.length; // 計算現有計時器數量
 
+// 音效控制元素
+const enableSoundCheckbox = document.getElementById('enableSound');
+const volumeControl = document.getElementById('volumeControl');
+const alarmSound = document.getElementById('alarmSound');
+
+// 初始化音效
+alarmSound.volume = volumeControl.value; // 設定初始音量
+
+// 監聽音量控制滑動條的變動
+volumeControl.addEventListener('input', () => {
+  alarmSound.volume = volumeControl.value; // 動態調整音量
+});
+
 // 初始化計時器 UI
 function renderTimers() {
   const container = document.getElementById('timersContainer');
@@ -89,6 +102,10 @@ function startTimer(index) {
     if (timers[index].remainingTime <= 0) {
       clearInterval(timers[index].intervalId);
       timers[index].intervalId = null;
+      // 檢查是否開啟音效提醒
+      if (enableSoundCheckbox.checked) {
+        alarmSound.play(); // 播放音效
+      }
       alert(`${timers[index].name} 完成倒數`);
     }
   }, 1000);
